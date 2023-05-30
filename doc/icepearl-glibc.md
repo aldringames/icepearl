@@ -53,7 +53,8 @@ The only way you can mount and format BIOS partitions.
 | /dev/sda4 | /           | Free space | ext4     |
 
 Format all of the partitions:
-                                                                                ```bash
+
+```bash
 mkfs.vfat -F32 /dev/sda1
 mkfs.ext2 /dev/sda2
 mkswap /dev/sda3

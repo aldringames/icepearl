@@ -1,6 +1,6 @@
 # IcePearl
 
-S linux distribution based on Alpine Linux but it's made of Ice Cream.
+A linux distribution based on Alpine Linux but it's made of Ice Cream.
 
 ## Icepearl Glibc
 
