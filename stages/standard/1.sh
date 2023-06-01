@@ -59,15 +59,17 @@ make ARCH=$ICEPEARL_KERNEL_ARCH INSTALL_HDR_PATH="${ICEPEARL_TOOLCHAIN}/usr" hea
 _msg "Cloning gcc"
 _clone Thesis git://gcc.gnu.org/git/gcc.git $ICEPEARL_SOURCES/gcc
 cd $ICEPEARL_SOURCES/gcc
-
-_msg "Applying glaucus patch for gcc"
 case $ICEPEARL_TARGET in
-	aarch64-icepearl-linux-gnu) _glaucus_patch_arch=aarch64 ;;
-	mips64-icepearl-linux-gnu) _glaucus_patch_arch=mips64 ;;
-	riscv64-icepearl-linux-gnu) _glaucus_patch_arch=riscv64 ;;
-	x86_64-icepearl-linux-gnu) _glaucus_patch_arch=x86-64 ;;
+	aarch64-icepearl-linux-gnu)
+		;;
+	mips64-icepearl-linux-gnu)
+		;;
+	riscv64-icepearl-linux-gnu)
+		;;
+	x86_64-icepearl-linux-gnu)
+		sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
+		;;
 esac
-wget -q -O- "https://github.com/firasuke/mussel/raw/main/patches/gcc/glaucus/0001-pure64-for-${_glaucus_patch_arch}.patch" | patch -Np1 -i-
 
 case $ICEPEARL_TARGET in
 	aarch64-icepearl-linux-gnu)
