@@ -1,11 +1,7 @@
-# IcePearl
+# Icepearl
 
 A linux distribution based on Alpine Linux but it's made of Ice Cream.
 
-## Icepearl Glibc
+## License
 
-See here at [doc/icepearl-glibc.md](doc/icepearl-glibc.md).
-
-## Icepearl LLVM
-
-See here at [doc/icepearl-llvm.md](doc/icepearl-llvm.md).
+See here the license at [LICENSE](LICENSE) file.
