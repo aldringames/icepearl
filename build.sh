@@ -1,3 +1,4 @@
+#!/bin/bash -e
 CURDIR="$(pwd)"
 
 source "${CURDIR}/common/functions.sh"
