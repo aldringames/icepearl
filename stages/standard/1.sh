@@ -57,7 +57,7 @@ make ARCH=$ICEPEARL_KERNEL_ARCH INSTALL_HDR_PATH="${ICEPEARL_TOOLCHAIN}/usr" hea
 
 # 3. gcc (compiler)
 _msg "Cloning gcc"
-_clone Thesis git://gcc.gnu.org/git/gcc.git $ICEPEARL_BUILD/gcc
+_clone Thesis git://gcc.gnu.org/git/gcc.git $ICEPEARL_SOURCES/gcc
 cd $ICEPEARL_SOURCES/gcc
 
 _msg "Applying glaucus patch for gcc"
