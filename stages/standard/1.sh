@@ -90,16 +90,18 @@ CXX=$BLD_CXX \
 CFLAGS=$BLD_CFLAGS \
 CXXFLAGS=$BLD_CXXFLAGS \
 LDFLAGS=$BLD_LDFLAGS \
-$ICEPEARL_SOURCES/binutils/configure --prefix=$ICEPEARL_TOOLCHAIN       \
-                                     --build=$ICEPEARL_HOST             \
-				     --host=$ICEPEARL_HOST              \
-                                     --target=$ICEPEARL_TARGET          \
-                                     --with-sysroot=$ICEPEARL_TOOLCHAIN \
-				     --enable-initfini-array            \
-				     --enable-languages=c,c++           \
-				     --disable-multilib                 \
-				     --disable-nls                      \
-				     --disable-werror $_gcc_opts > /dev/null
+$ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN       \
+                                --libdir=/lib                      \
+				--libexecdir=/lib                  \
+                                --build=$ICEPEARL_HOST             \
+				--host=$ICEPEARL_HOST              \
+                                --target=$ICEPEARL_TARGET          \
+                                --with-sysroot=$ICEPEARL_TOOLCHAIN \
+				--enable-initfini-array            \
+				--enable-languages=c,c++           \
+				--disable-multilib                 \
+				--disable-nls                      \
+				--disable-werror $_gcc_opts > /dev/null
 
 _msg "Building gcc (compiler)"
 make -j4 all-gcc > /dev/null
@@ -118,4 +120,35 @@ make install-target-libgcc
 
 # 5. glibc
 _msg "Cloning glibc"
+_clone master git://sourceware.org/git/glibc.git $ICEPEARL_SOURCES/glibc
 
+mkdir $ICEPEARL_BUILD/glibc && cd $ICEPEARL_BUILD/glibc
+_msg "Configuring glibc"
+cat > configparms <<EOF
+slibdir=/usr/lib
+rtlddir=/usr/lib
+sbindir=/usr/bin
+rootsbindir=/usr/bin
+EOF
+AR=$BLD_AR \
+CC=$BLD_CC \
+CXX=$BLD_CXX \
+CFLAGS=$BLD_CFLAGS \
+CXXFLAGS=$BLD_CXXFLAGS \
+LDFLAGS=$BLD_LDFLAGS \
+$ICEPEARL_SOURCES/glibc/configure --prefix=/usr                                  \
+                                  --libdir=/usr/lib                              \
+				  --libexecdir=/usr/lib                          \
+                                  --build=$ICEPEARL_HOST                         \
+                                  --host=$ICEPEARL_TARGET                        \
+				  --enable-kernel=4.4                            \
+				  --with-headers=$ICEPEARL_TOOLCHAIN/usr/include > /dev/null
+
+_msg "Building glibc"
+make -j4 > /dev/null
+
+_msg "Installing glibc"
+make DESTDIR=$ICEPEARL_TOOLCHAIN install > /dev/null
+
+_msg "Fixing hard coded path"
+sed '/RTLDLIST=/s@/usr@@g' -i $ICEPEARL_TOOLCHAIN/usr/bin/ldd
