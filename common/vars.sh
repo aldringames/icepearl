@@ -5,7 +5,7 @@ ICEPEARL_SOURCES="${ICEPEARL_DIR}/sources"
 ICEPEARL_ROOTFS="${ICEPEARL_DIR}/rootfs"
 ICEPEARL_ISO="${ICEPEARL_DIR}/iso"
 ICEPEARL_HOST="x86_64-linux-gnu"
-ICEPEARL_TARGET="$2-icepearl-linux-gnu"
+ICEPEARL_TARGET="x86_64-icepearl-linux-gnu"
 
 BLD_CC="${BLD_CC:=gcc -static --static}"
 BLD_CXX="${BLD_CXX:=g++ -static --static}"

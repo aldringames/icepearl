@@ -19,17 +19,6 @@ case $1 in
 		;;
 esac
 
-case $2 in
-	x86_64)
-		;;
-	aarch64)
-		;;
-	*)
-		_err "$2 is not supported to build the image for Icepearl"
-		exit 1
-		;;
-esac
-
 rm -rf icepearl
 for stage in {1..5}
 do

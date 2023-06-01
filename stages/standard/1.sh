@@ -15,6 +15,13 @@ sed '6009s/$add_dir//' -i ltmain.sh
 
 mkdir $ICEPEARL_BUILD/binutils && cd $ICEPEARL_BUILD/binutils
 _msg "Configuring binutils"
+AR=$BLD_AR \
+AS=$BLD_AS \
+CC=$BLD_CC \
+CXX=$BLD_CXX \
+CFLAGS=$BLD_CFLAGS \
+CXXFLAGS=$BLD_CXXFLAGS \
+LDFLAGS=$BLD_LDFLAGS \
 $ICEPEARL_SOURCES/binutils/configure --prefix=$ICEPEARL_TOOLCHAIN       \
 	                             --build=$ICEPEARL_HOST             \
 	                             --host=$ICEPEARL_HOST              \
@@ -28,6 +35,10 @@ $ICEPEARL_SOURCES/binutils/configure --prefix=$ICEPEARL_TOOLCHAIN       \
 				     --disable-gprofng                  \
 				     --disable-multilib                 \
 				     --disable-nls                      \
-				     --disable-werror                   > /dev/null
+				     --disable-werror > /dev/null
 
-_msg ""
+_msg "Building binutils"
+make -j4 > /dev/null
+
+_msg "Installing binutils"
+make install > /dev/null
