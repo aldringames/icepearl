@@ -144,6 +144,9 @@ $ICEPEARL_SOURCES/glibc/configure --prefix=/usr                                 
 				  --enable-kernel=4.4                            \
 				  --with-headers=$ICEPEARL_TOOLCHAIN/usr/include > /dev/null
 
+_msg "Installing glibc headers"
+make DESTDIR=$ICEPEARL_TOOLCHAIN install-bootstrap-headers=yes install-headers > /dev/null
+
 _msg "Building glibc"
 make -j4 > /dev/null
 
