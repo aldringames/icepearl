@@ -61,6 +61,7 @@ _clone Thesis git://gcc.gnu.org/git/gcc.git $ICEPEARL_SOURCES/gcc
 cd $ICEPEARL_SOURCES/gcc
 case $ICEPEARL_TARGET in
 	aarch64-icepearl-linux-gnu)
+		sed -e '/mabi.lp64=/s/lib64/lib/' -i.orig gcc/config/i386/t-aarch64-linux
 		;;
 	mips64-icepearl-linux-gnu)
 		;;
@@ -105,3 +106,16 @@ make -j4 all-gcc > /dev/null
 
 _msg "Installing gcc (compiler)"
 make install-gcc > /dev/null
+
+# 4. gcc (static)
+_msg "Building gcc (static)"
+CFLAGS="-pipe -g0 -O0" \
+CXXFLAGS="$CFLAGS" \
+make -j4 enable_shared=no all-target-libgcc
+
+_msg "Installing gcc (static)"
+make install-target-libgcc
+
+# 5. glibc
+_msg "Cloning glibc"
+
