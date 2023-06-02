@@ -15,7 +15,7 @@ jobs:
           apt-get -qqy update
 
           apt-get -qqy install gcc g++ binutils automake gettext* flex bison intltool libtool git-lfs texinfo build-essential
-          autoconf linux-libc-dev libmpfr-dev libmpc-dev libisl-dev libgmp-dev libc-dev bc file python3-dev
+          autoconf libc-dev linux-libc-dev libmpfr-dev libmpc-dev libisl-dev libgmp-dev libc-dev bc file python3-dev
           libbabeltrace-dev libipt-dev libncurses-dev wget bzip2 autopoint gcc-multilib g++-multilib gawk rsync
       - name: Build
         run: ./build.sh standard x86_64
