@@ -121,12 +121,6 @@ rtlddir=/usr/lib
 sbindir=/usr/bin
 rootsbindir=/usr/bin
 EOF
-AR=$BLD_AR \
-CC=$BLD_CC \
-CXX=$BLD_CXX \
-CFLAGS=$BLD_CFLAGS \
-CXXFLAGS=$BLD_CXXFLAGS \
-LDFLAGS="$BLD_LDFLAGS -no-pie" \
 $ICEPEARL_SOURCES/glibc/configure --prefix=/usr                                  \
                                   --libdir=/usr/lib                              \
 				  --libexecdir=/usr/lib                          \
