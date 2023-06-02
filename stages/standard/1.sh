@@ -139,6 +139,7 @@ _msg "Fixing glibc's hard coded path"
 sed '/RTLDLIST=/s@/usr@@g' -i $ICEPEARL_TOOLCHAIN/usr/bin/ldd
 
 # 5. gcc (libgcc-shared)
+cd $ICEPEARL_BUILD/gcc
 _msg "Cleaning gcc (libgcc-static)"
 make -C $ICEPEARL_TARGET/libgcc clean distclean
 
