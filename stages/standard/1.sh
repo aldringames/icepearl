@@ -1,4 +1,5 @@
 #!/bin/bash -e
+CURDIR="$(pwd)"
 source ${CURDIR}/commons/functions.sh
 source ${CURDIR}/commons/vars.sh
 
