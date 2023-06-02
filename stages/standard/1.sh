@@ -46,7 +46,7 @@ _configure_options=(--prefix=/usr
 		    --sbindir=/usr/bin
 		    --sysconfdir=/etc
 		    --docdir=/usr/share/doc
-		    --infodit=/usr/share/info
+		    --infodir=/usr/share/info
 		    --mandir=/usr/share/man
 	            --build=$ICEPEARL_HOST
 	            --host=$ICEPEARL_HOST)
