@@ -6,6 +6,8 @@ source "${CURDIR}/common/vars.sh"
 
 _msg "Preparing icepearl directories"
 mkdir -p $ICEPEARL_DIR/{build,toolchain,sources,rootfs,iso}
+_msg "Adding Icepearl's toolchain bin to the PATH"
+export PATH="$ICEPEARL_TOOLCHAIN/bin:$PATH"
 
 # 1. binutils
 _msg "Cloning binutils"
@@ -100,13 +102,13 @@ make -j4 all-gcc > /dev/null
 _msg "Installing gcc (compiler)"
 make install-gcc > /dev/null
 
-# 3. gcc (libgcc static)
-_msg "Building gcc (libgcc static)"
+# 3. gcc (libgcc-static)
+_msg "Building gcc (libgcc-static)"
 CFLAGS="-pipe -g0 -O0" \
 CXXFLAGS="$CFLAGS" \
 make -j4 enable_shared=no all-target-libgcc > /dev/null
 
-_msg "Installing gcc (libgcc static)"
+_msg "Installing gcc (libgcc-static)"
 make install-target-libgcc > /dev/null
 
 # 4. glibc
@@ -143,8 +145,29 @@ cd $ICEPEARL_BUILD/gcc
 _msg "Cleaning up the entire libgcc static"
 make -C $ICEPEARL_TARGET/libgcc clean distclean > /dev/null
 
-_msg "Installing gcc (libgcc shared)"
+_msg "Building gcc (libgcc-shared)"
 make -j4 enable_shared=yes all-target-libgcc > /dev/null
 
-_msg "Installing gcc (libgcc shared)"
+_msg "Installing gcc (libgcc-shared)"
 make install-target-libgcc > /dev/null
+
+# 6. gcc (libstdc++-v3)
+_msg "Building gcc (libstdc++-v3)"
+make -j4 all-target-libstdc++-v3 > /dev/null
+
+_msg "Installing gcc (libstdc++-v3)"
+make install-target-libstdc++-v3 > /dev/null
+
+# 7. gcc (libgomp)
+_msg "Building gcc (libgomp)"
+make -j4 all-target-libgomp > /dev/null
+
+_msg "Installing gcc (libgomp)"
+make install-target-libgomp > /dev/null
+
+# 8. gcc derivatives
+cd $ICEPEARL_SOURCES/gcc
+_msg "Creating limits.h"
+cat gcc/limitx.h gcc/glimits.h gcc/limity.h > `dirname $($ICEPEARL_TARGET-gcc -print-libgcc-file-name)`/include/limits.h
+_msg "Linking into $ICEPEARL_TARGET-cc"
+ln -s $ICEPEARL_TARGET-gcc $ICEPEARL_TOOLCHAIN/bin/$ICEPEARL_TARGET-cc
