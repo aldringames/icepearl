@@ -104,9 +104,10 @@ make install-gcc install-target-libgcc > /dev/null
 
 ls $ICEPEARL_TOOLCHAIN
 ls $ICEPEARL_TOOLCHAIN/$ICEPEARL_TARGET
-ls $ICEPEARL_TOOLCHAIN/$ICEPEARL_TARGET/include
-ls $ICEPEARL_TOOLCHAIN/$ICEPEARL_TARGET/include/c++
+ls $ICEPEARL_TOOLCHAIN/include
+ls $ICEPEARL_TOOLCHAIN/include/c++
 $ICEPEARL_TARGET-gcc --version
+exit 1
 
 # 4. glibc
 _msg "Cloning glibc"
