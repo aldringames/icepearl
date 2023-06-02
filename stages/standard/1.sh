@@ -81,31 +81,30 @@ CXX=$BLD_CXX \
 CFLAGS=$BLD_CFLAGS \
 CXXFLAGS=$BLD_CXXFLAGS \
 LDFLAGS=$BLD_LDFLAGS \
-$ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN       \
-                                --libdir=/usr/lib                  \
-				--libexecdir=/usr/lib              \
-                                --build=$ICEPEARL_HOST             \
-				--host=$ICEPEARL_HOST              \
-                                --target=$ICEPEARL_TARGET          \
-				--with-newlib                      \
-                                --with-sysroot=/                   \
-				--without-headers                  \
-				--enable-initfini-array            \
-				--enable-languages=c,c++           \
-				--disable-multilib                 \
-				--disable-nls                      \
+$ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN \
+                                --libdir=/usr/lib            \
+				--libexecdir=/usr/lib        \
+                                --build=$ICEPEARL_HOST       \
+				--host=$ICEPEARL_HOST        \
+                                --target=$ICEPEARL_TARGET    \
+				--with-newlib                \
+                                --with-sysroot=/             \
+				--without-headers            \
+				--enable-initfini-array      \
+				--enable-languages=c,c++     \
+				--disable-multilib           \
+				--disable-nls                \
 				--disable-werror $_gcc_opts > /dev/null
 
-_msg "Building gcc (compiler)"
+_msg "Building gcc (compiler and libgcc)"
 make -j4 all-gcc all-target-libgcc > /dev/null
 
-_msg "Installing gcc (compiler)"
+_msg "Installing gcc (compiler and libgcc)"
 make install-gcc install-target-libgcc > /dev/null
 
 cd $ICEPEARL_SOURCES/gcc
 _msg "Creating limits.h"
-cat gcc/limitx.h gcc/glimits.h gcc/limity.h > `dirname $($ICEPEARL_TARGET-gcc -print-lib
-gcc-file-name)`/include/limits.h
+cat gcc/limitx.h gcc/glimits.h gcc/limity.h > `dirname $($ICEPEARL_TARGET-gcc -print-libgcc-file-name)`/include/limits.h
 _msg "Linking into $ICEPEARL_TARGET-cc"
 ln -s $ICEPEARL_TARGET-gcc $ICEPEARL_TOOLCHAIN/bin/$ICEPEARL_TARGET-cc
 
@@ -121,12 +120,12 @@ rtlddir=/usr/lib
 sbindir=/usr/bin
 rootsbindir=/usr/bin
 EOF
-$ICEPEARL_SOURCES/glibc/configure --prefix=/usr                                  \
-                                  --libdir=/usr/lib                              \
-				  --libexecdir=/usr/lib                          \
-                                  --build=$ICEPEARL_HOST                         \
-                                  --host=$ICEPEARL_TARGET                        \
-				  --enable-kernel=4.4                            \
+$ICEPEARL_SOURCES/glibc/configure --prefix=/usr           \
+                                  --libdir=/usr/lib       \
+				  --libexecdir=/usr/lib   \
+                                  --build=$ICEPEARL_HOST  \
+                                  --host=$ICEPEARL_TARGET \
+				  --enable-kernel=4.4     \
 				  --with-headers=/usr/include > /dev/null
 
 _msg "Building glibc"
@@ -148,7 +147,7 @@ $ICEPEARL_SOURCES/gcc/configure --prefix=/usr                                   
                                 --host=$ICEPEARL_TARGET                                                   \
 				--with-gxx-include-dir=$ICEPEARL_TOOLCHAIN/$ICEPEARL_TARGET/include/c++/* \
 				--disable-multilib                                                        \
-                                --disable-nls
+                                --disable-nls > /dev/null
 
 _msg "Building gcc (libstdc++-v3)"
 make -j4 all-target-libstdc++-v3 > /dev/null
@@ -157,6 +156,16 @@ _msg "Installing gcc (libstdc++-v3)"
 make install-target-libstdc++-v3 > /dev/null
 
 # 6. gcc (libgomp)
+mkdir $ICEPEARL_BUILD/libgomp && cd $ICEPEARL_BUILD/libgomp
+_msg "Configuring gcc (libgomp)"
+$ICEPEARL_SOURCES/gcc/configure --prefix=/usr           \
+	                        --libdir=/usr/lib       \
+				--libexecdir=/usr/lib   \
+				--build=$ICEPEARL_HOST  \
+				--host=$ICEPEARL_TARGET \
+				--disable-multilib      \
+				--disable-nls > /dev/null
+
 _msg "Building gcc (libgomp)"
 make -j4 all-target-libgomp > /dev/null
 
