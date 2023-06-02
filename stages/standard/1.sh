@@ -102,6 +102,12 @@ make -j4 all-gcc all-target-libgcc > /dev/null
 _msg "Installing gcc (compiler and libgcc)"
 make install-gcc install-target-libgcc > /dev/null
 
+ls $ICEPEARL_TOOLCHAIN
+ls $ICEPEARL_TOOLCHAIN/$ICEPEARL_TARGET
+ls $ICEPEARL_TOOLCHAIN/$ICEPEARL_TARGET/include
+ls $ICEPEARL_TOOLCHAIN/$ICEPEARL_TARGET/include/c++
+$ICEPEARL_TARGET-gcc --version
+
 # 4. glibc
 _msg "Cloning glibc"
 _clone master git://sourceware.org/git/glibc.git $ICEPEARL_SOURCES/glibc
