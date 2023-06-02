@@ -44,18 +44,7 @@ make -j4 > /dev/null
 _msg "Installing binutils"
 make install > /dev/null
 
-# 2. kernel-rc-api-headers
-_msg "Cloning kernel-rc-api-headers"
-_clone linux-4.14.y git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git $ICEPEARL_SOURCES/kernel-rc-api-headers
-cd $ICEPEARL_SOURCES/kernel-rc-api-headers
-
-_msg "Building kernel-rc-api-headers"
-make ARCH=$ICEPEARL_KERNEL_ARCH mrproper
-
-_msg "Installing kernel-rc-api-headers"
-make ARCH=$ICEPEARL_KERNEL_ARCH INSTALL_HDR_PATH="${ICEPEARL_TOOLCHAIN}/usr" headers_install > /dev/null
-
-# 3. gcc (compiler)
+# 2. gcc (compiler)
 _msg "Cloning gcc"
 _clone Thesis git://gcc.gnu.org/git/gcc.git $ICEPEARL_SOURCES/gcc
 cd $ICEPEARL_SOURCES/gcc
@@ -111,16 +100,16 @@ make -j4 all-gcc > /dev/null
 _msg "Installing gcc (compiler)"
 make install-gcc > /dev/null
 
-# 4. gcc (static)
-_msg "Building gcc (static)"
+# 3. gcc (libgcc static)
+_msg "Building gcc (libgcc static)"
 CFLAGS="-pipe -g0 -O0" \
 CXXFLAGS="$CFLAGS" \
-make -j4 enable_shared=no all-target-libgcc
+make -j4 enable_shared=no all-target-libgcc > /dev/null
 
-_msg "Installing gcc (static)"
-make install-target-libgcc
+_msg "Installing gcc (libgcc static)"
+make install-target-libgcc > /dev/null
 
-# 5. glibc
+# 4. glibc
 _msg "Cloning glibc"
 _clone master git://sourceware.org/git/glibc.git $ICEPEARL_SOURCES/glibc
 
@@ -144,7 +133,7 @@ $ICEPEARL_SOURCES/glibc/configure --prefix=/usr                                 
                                   --build=$ICEPEARL_HOST                         \
                                   --host=$ICEPEARL_TARGET                        \
 				  --enable-kernel=4.4                            \
-				  --with-headers=/ > /dev/null
+				  --with-headers=/usr/include > /dev/null
 
 _msg "Building glibc"
 make -j4 > /dev/null
@@ -152,5 +141,16 @@ make -j4 > /dev/null
 _msg "Installing glibc"
 make DESTDIR=$ICEPEARL_TOOLCHAIN install > /dev/null
 
-_msg "Fixing hard coded path"
+_msg "Fixing glibc's hard coded path"
 sed '/RTLDLIST=/s@/usr@@g' -i $ICEPEARL_TOOLCHAIN/usr/bin/ldd
+
+# 5. gcc (libgcc shared)
+cd $ICEPEARL_BUILD/gcc
+_msg "Cleaning up the entire libgcc static"
+make -C $ICEPEARL_TARGET/libgcc clean distclean > /dev/null
+
+_msg "Installing gcc (libgcc shared)"
+make -j4 enable_shared=yes all-target-libgcc > /dev/null
+
+_msg "Installing gcc (libgcc shared)"
+make install-target-libgcc > /dev/null
