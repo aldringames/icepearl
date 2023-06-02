@@ -27,7 +27,7 @@ $ICEPEARL_SOURCES/binutils/configure --prefix=$ICEPEARL_TOOLCHAIN       \
 	                             --build=$ICEPEARL_HOST             \
 	                             --host=$ICEPEARL_HOST              \
 				     --target=$ICEPEARL_TARGET          \
-				     --with-sysroot=$ICEPEARL_TOOLCHAIN \
+				     --with-sysroot=/                   \
 				     --enable-deterministic-archives    \
 				     --disable-gdb                      \
 				     --disable-gdbserver                \
@@ -97,7 +97,7 @@ $ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN       \
 				--host=$ICEPEARL_HOST              \
                                 --target=$ICEPEARL_TARGET          \
 				--with-newlib                      \
-                                --with-sysroot=$ICEPEARL_TOOLCHAIN \
+                                --with-sysroot=/                   \
 				--without-headers                  \
 				--enable-initfini-array            \
 				--enable-languages=c,c++           \
@@ -144,7 +144,7 @@ $ICEPEARL_SOURCES/glibc/configure --prefix=/usr                                 
                                   --build=$ICEPEARL_HOST                         \
                                   --host=$ICEPEARL_TARGET                        \
 				  --enable-kernel=4.4                            \
-				  --with-headers=$ICEPEARL_TOOLCHAIN/usr/include > /dev/null
+				  --with-headers=/ > /dev/null
 
 _msg "Building glibc"
 make -j4 > /dev/null
