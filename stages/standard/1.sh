@@ -96,7 +96,9 @@ $ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN       \
                                 --build=$ICEPEARL_HOST             \
 				--host=$ICEPEARL_HOST              \
                                 --target=$ICEPEARL_TARGET          \
+				--with-newlib                      \
                                 --with-sysroot=$ICEPEARL_TOOLCHAIN \
+				--without-headers                  \
 				--enable-initfini-array            \
 				--enable-languages=c,c++           \
 				--disable-multilib                 \
@@ -143,9 +145,6 @@ $ICEPEARL_SOURCES/glibc/configure --prefix=/usr                                 
                                   --host=$ICEPEARL_TARGET                        \
 				  --enable-kernel=4.4                            \
 				  --with-headers=$ICEPEARL_TOOLCHAIN/usr/include > /dev/null
-
-_msg "Installing glibc headers"
-make DESTDIR=$ICEPEARL_TOOLCHAIN install-bootstrap-headers=yes install-headers > /dev/null
 
 _msg "Building glibc"
 make -j4 > /dev/null
