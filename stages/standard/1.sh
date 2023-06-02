@@ -102,6 +102,9 @@ make -j4 all-gcc > /dev/null
 _msg "Installing gcc (compiler)"
 make install-gcc > /dev/null
 
+_msg "Linking libgcc.a as `$ICEPEARL_TARGET-gcc -print-libgcc-file-name`"
+ln -s libgcc.a `$ICEPEARL_TARGET-gcc -print-libgcc-file-name | sed 's/libgcc/&_eh/'`
+
 # 3. gcc (libgcc-static)
 _msg "Building gcc (libgcc-static)"
 CFLAGS="-pipe -g0 -O0" \
