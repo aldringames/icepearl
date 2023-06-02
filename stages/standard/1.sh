@@ -1,171 +1,80 @@
 #!/bin/bash -e
-CURDIR="$(pwd)"
+source ${CURDIR}/commons/functions.sh
+source ${CURDIR}/commons/vars.sh
 
-source "${CURDIR}/common/functions.sh"
-source "${CURDIR}/common/vars.sh"
+_msg "Dwleting icepearl directory"
+rm -rf $ICEPEARL_DIR
+_msg "Preparing icepearl directores"
+mkdir -p $ICEPEARL_DIR/{sources,rootfs,iso,initrd}
+_msg "Preparing icepearl rootfs directories"
+pushd $ICEPEARL_ROOTFS
+  mkdir -p {boot,home,mnt,opt,srv}                             \
+           {etc,var}                                           \
+           etc/{opt,sysconfig}                                 \
+           usr/{bin,lib}                                       \
+           usr/lib/firmware                                    \
+           usr/{,local/}{include,src}                          \
+           usr/local/{sbin,bin,lib}                            \
+           usr/{,local/}share/{color,dict,doc,info,locale,man} \
+           usr/{,local/}share/{misc,terminfo,zoneinfo}         \
+           usr/{,local/}share/man/man{1..8}                    \
+           var/{cache,local,log,mail,opt,spool}                \
+           var/lib/{color,misc,locate}                         \
+           {dev,proc,sys,run}
+  # Using /usr merge
+  ln -sfv usr/bin sbin
+  ln -sfv usr/bin bin
+  ln -sfv usr/lib lib
+  ln -sfv usr/lib lib64
+  ln -sfv bin usr/sbin 
+  ln -sfv lib usr/lib64
 
-_msg "Preparing icepearl directories"
-mkdir -p $ICEPEARL_DIR/{build,toolchain,sources,rootfs,iso}
-_msg "Adding Icepearl's toolchain bin to the PATH"
-export PATH="$ICEPEARL_TOOLCHAIN/bin:$PATH"
+  ln -sfv run var/run
+  ln -sfv run/lock var/lock
 
-# 1. binutils
-_msg "Cloning binutils"
-_clone master git://sourceware.org/git/binutils-gdb.git $ICEPEARL_SOURCES/binutils
-cd $ICEPEARL_SOURCES/binutils
-_msg "Using a sysroot support for binutils"
-sed '6009s/$add_dir//' -i ltmain.sh
+  install -dv -m 0750 root
+  install -dv -m 1777 tmp var/tmp
+popd 
 
-mkdir $ICEPEARL_BUILD/binutils && cd $ICEPEARL_BUILD/binutils
-_msg "Configuring binutils"
-AR=$BLD_AR \
-AS=$BLD_AS \
-CC=$BLD_CC \
-CXX=$BLD_CXX \
-CFLAGS=$BLD_CFLAGS \
-CXXFLAGS=$BLD_CXXFLAGS \
-LDFLAGS=$BLD_LDFLAGS \
-$ICEPEARL_SOURCES/binutils/configure --prefix=$ICEPEARL_TOOLCHAIN       \
-	                             --build=$ICEPEARL_HOST             \
-	                             --host=$ICEPEARL_HOST              \
-				     --target=$ICEPEARL_TARGET          \
-				     --with-sysroot=/                   \
-				     --enable-deterministic-archives    \
-				     --disable-gdb                      \
-				     --disable-gdbserver                \
-				     --disable-gdbsupport               \
-				     --disable-gprof                    \
-				     --disable-gprofng                  \
-				     --disable-multilib                 \
-				     --disable-nls                      \
-				     --disable-werror > /dev/null
+# Configure options
+_configure_options=(--prefix=/usr
+	            --exec-prefix=/usr
+	            --libdir=/usr/lib
+		    --libexecdir=/usr/lib
+		    --bindir=/usr/bin
+		    --sbindir=/usr/bin
+		    --sysconfdir=/etc
+		    --docdir=/usr/share/doc
+		    --infodit=/usr/share/info
+		    --mandir=/usr/share/man
+	            --build=$ICEPEARL_HOST
+	            --host=$ICEPEARL_HOST)
 
-_msg "Building binutils"
-make -j4 > /dev/null
+# 1. glibc
+_msg "Downloading and extracting glibc"
+mkdir $ICEPEARL_SOURCES/glibc
+wget -q -O- https://ftp.gnu.org/gnu/glibc/glibc-2.37.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/glibc
+cd $ICEPEARL_SOURCES/glibc
+sed '/width -=/s/workend - string/number_length/' -i stdio-common/vfprintf-process-arg.c
 
-_msg "Installing binutils"
-make install > /dev/null
-
-# 2. gcc (compiler and libgcc)
-_msg "Cloning gcc"
-_clone Thesis git://gcc.gnu.org/git/gcc.git $ICEPEARL_SOURCES/gcc
-cd $ICEPEARL_SOURCES/gcc
-case $ICEPEARL_TARGET in
-	aarch64-icepearl-linux-gnu)
-		sed -e '/mabi.lp64=/s/lib64/lib/' -i.orig gcc/config/i386/t-aarch64-linux
-		;;
-	mips64-icepearl-linux-gnu)
-		;;
-	riscv64-icepearl-linux-gnu)
-		;;
-	x86_64-icepearl-linux-gnu)
-		sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
-		;;
-esac
-
-case $ICEPEARL_TARGET in
-	aarch64-icepearl-linux-gnu)
-		_gcc_opts="--enable-fix-cortex-a53-835769 --enable-fix-cortex-a53-843419" ;;
-	mips64-icepearl-linux-gnu)
-		_gcc_opts="--with-endian=big --with-arch=mips64r2 --with-float=hard" ;;
-	riscv64-icepearl-linux-gnu)
-		_gcc_opts="--with-arch=rv64gc --with-abi=lp64d" ;;
-	x86_64-icepearl-linux-gnu)
-		_gcc_opts="--with-arch=x86-64 --with-tune=generic" ;;
-esac
-mkdir $ICEPEARL_BUILD/gcc && cd $ICEPEARL_BUILD/gcc
-_msg "Configuring gcc"
-AR=$BLD_AR \
-CC=$BLD_CC \
-CXX=$BLD_CXX \
-CFLAGS=$BLD_CFLAGS \
-CXXFLAGS=$BLD_CXXFLAGS \
-LDFLAGS=$BLD_LDFLAGS \
-$ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN \
-                                --libdir=/usr/lib            \
-				--libexecdir=/usr/lib        \
-                                --build=$ICEPEARL_HOST       \
-				--host=$ICEPEARL_HOST        \
-                                --target=$ICEPEARL_TARGET    \
-				--with-newlib                \
-                                --with-sysroot=/             \
-				--without-headers            \
-				--enable-initfini-array      \
-				--enable-languages=c,c++     \
-				--disable-multilib           \
-				--disable-nls                \
-				--disable-werror $_gcc_opts > /dev/null
-
-_msg "Building gcc (compiler and libgcc)"
-make -j4 all-gcc all-target-libgcc > /dev/null
-
-_msg "Installing gcc (compiler and libgcc)"
-make install-gcc install-target-libgcc > /dev/null
-
-ls $ICEPEARL_TOOLCHAIN
-ls $ICEPEARL_TOOLCHAIN/$ICEPEARL_TARGET
-ls $ICEPEARL_TOOLCHAIN/include
-ls $ICEPEARL_TOOLCHAIN/include/c++
-$ICEPEARL_TARGET-gcc --version
-exit 1
-
-# 4. glibc
-_msg "Cloning glibc"
-_clone master git://sourceware.org/git/glibc.git $ICEPEARL_SOURCES/glibc
-
-mkdir $ICEPEARL_BUILD/glibc && cd $ICEPEARL_BUILD/glibc
 _msg "Configuring glibc"
+mkdir $ICEPEARL_BUILD/glibc && cd $ICEPEARL_BUILD/glibc
 cat > configparms <<EOF
 slibdir=/usr/lib
 rtlddir=/usr/lib
 sbindir=/usr/bin
-rootsbindir=/usr/bin
+rootsbindir=/usr/bib
 EOF
-$ICEPEARL_SOURCES/glibc/configure --prefix=/usr           \
-                                  --libdir=/usr/lib       \
-				  --libexecdir=/usr/lib   \
-                                  --build=$ICEPEARL_HOST  \
-                                  --host=$ICEPEARL_TARGET \
-				  --enable-kernel=4.4     \
-				  --with-headers=/usr/include > /dev/null
+$ICEPEARL_SOURCES/glibc/configure "${_configure_options[@]:?_configure_options unset}" \
+	                          --with-headers=/usr/include                          \
+	                          --enable-kernel=4.4                                  \
+				  --enable-stack-protector=strong                      \
+				  --disable-werror > /dev/null
 
 _msg "Building glibc"
 make -j4 > /dev/null
 
 _msg "Installing glibc"
-make DESTDIR=$ICEPEARL_TOOLCHAIN install > /dev/null
+make DESTDIR=$ICEPEARL_ROOTFS install
 
-_msg "Fixing glibc's hard coded path"
-sed '/RTLDLIST=/s@/usr@@g' -i $ICEPEARL_TOOLCHAIN/usr/bin/ldd
-
-# 5. gcc (libstdc++-v3)
-mkdir $ICEPEARL_BUILD/libstdc++-v3 && cd $ICEPEARL_BUILD/libstdc++-v3
-$ICEPEARL_SOURCES/gcc/libstdc++-v3/configure --prefix=/usr           \
-	                                     --libdir=/usr/lib       \
-					     --libexecdir=/usr/lib   \
-					     --build=$ICEPEARL_HOST  \
-					     --host=$ICEPEARL_TARGET \
-					     --disable-multilib      \
-					     --disable-nls           \
-					     --with-gxx-include-dir=$ICEPEARL_TOOLCHAIN/$ICEPEARL_TARGET/include/c++/* > /dev/null
-
-_msg "Building gcc (libstdc++-v3)"
-make -j4 > /dev/null
-
-_msg "Installing gcc (libstdc++-v3)"
-make install > /dev/null
-
-# 6. gcc (libgomp)
-
-_msg "Building gcc (libgomp)"
-make -j4 all-target-libgomp > /dev/null
-
-_msg "Installing gcc (libgomp)"
-make install-target-libgomp > /dev/null
-
-# 8. gcc derivatives
-cd $ICEPEARL_SOURCES/gcc
-_msg "Creating limits.h"
-cat gcc/limitx.h gcc/glimits.h gcc/limity.h > `dirname $($ICEPEARL_TARGET-gcc -print-libgcc-file-name)`/include/limits.h
-_msg "Linking into $ICEPEARL_TARGET-cc"
-ln -s $ICEPEARL_TARGET-gcc $ICEPEARL_TOOLCHAIN/bin/$ICEPEARL_TARGET-cc
+ls $ICEPEARL_ROOTFS
