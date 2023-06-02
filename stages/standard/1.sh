@@ -96,19 +96,20 @@ $ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN \
 				--disable-nls                \
 				--disable-werror $_gcc_opts > /dev/null
 
-_msg "Building gcc (compiler and libgcc)"
-make -j4 all-gcc all-target-libgcc > /dev/null
+_msg "Building gcc (compiler)"
+make -j4 all-gcc > /dev/null
 
-_msg "Installing gcc (compiler and libgcc)"
-make install-gcc install-target-libgcc > /dev/null
+_msg "Installing gcc (compiler)"
+make install-gcc > /dev/null
 
-cd $ICEPEARL_SOURCES/gcc
-_msg "Creating limits.h"
-cat gcc/limitx.h gcc/glimits.h gcc/limity.h > `dirname $($ICEPEARL_TARGET-gcc -print-libgcc-file-name)`/include/limits.h
-_msg "Linking into $ICEPEARL_TARGET-cc"
-ln -s $ICEPEARL_TARGET-gcc $ICEPEARL_TOOLCHAIN/bin/$ICEPEARL_TARGET-cc
+# 3. gcc (libgcc-static)
+_msg "Building gcc (libgcc-static)"
+make -j4 enabled_shared=no all-target-libgcc > /dev/null
 
-# 3. glibc
+_msg "Installing gcc (libgcc-static)"
+make install-target-libgcc > /dev/null
+
+# 4. glibc
 _msg "Cloning glibc"
 _clone master git://sourceware.org/git/glibc.git $ICEPEARL_SOURCES/glibc
 
@@ -137,37 +138,33 @@ make DESTDIR=$ICEPEARL_TOOLCHAIN install > /dev/null
 _msg "Fixing glibc's hard coded path"
 sed '/RTLDLIST=/s@/usr@@g' -i $ICEPEARL_TOOLCHAIN/usr/bin/ldd
 
-# 5. gcc (libstdc++-v3)
-mkdir $ICEPEARL_BUILD/libstdc++-v3 && cd $ICEPEARL_BUILD/libstdc++-v3
-_msg "Configuring gcc (libstdc++-v3)"
-$ICEPEARL_SOURCES/gcc/configure --prefix=/usr                                                             \
-                                --libdir=/usr/lib                                                         \
-                                --libexecdir=/usr/lib                                                     \
-                                --build=$ICEPEARL_HOST                                                    \
-                                --host=$ICEPEARL_TARGET                                                   \
-				--with-gxx-include-dir=$ICEPEARL_TOOLCHAIN/$ICEPEARL_TARGET/include/c++/* \
-				--disable-multilib                                                        \
-                                --disable-nls > /dev/null
+# 5. gcc (libgcc-shared)
+_msg "Cleaning gcc (libgcc-static)"
+make -C $ICEPEARL_TARGET/libgcc clean distclean
 
+_msg "Building gcc (libgcc-shared)"
+make -j4 enabled_shared=yes all-target-libgcc > /dev/null
+
+_msg "Installing gcc (libgcc-shared)"
+make install-target-libgcc > /dev/null
+
+# 6. gcc (libstdc++-v3)
 _msg "Building gcc (libstdc++-v3)"
 make -j4 all-target-libstdc++-v3 > /dev/null
 
 _msg "Installing gcc (libstdc++-v3)"
 make install-target-libstdc++-v3 > /dev/null
 
-# 6. gcc (libgomp)
-mkdir $ICEPEARL_BUILD/libgomp && cd $ICEPEARL_BUILD/libgomp
-_msg "Configuring gcc (libgomp)"
-$ICEPEARL_SOURCES/gcc/configure --prefix=/usr           \
-	                        --libdir=/usr/lib       \
-				--libexecdir=/usr/lib   \
-				--build=$ICEPEARL_HOST  \
-				--host=$ICEPEARL_TARGET \
-				--disable-multilib      \
-				--disable-nls > /dev/null
-
+# 7. gcc (libgomp)
 _msg "Building gcc (libgomp)"
 make -j4 all-target-libgomp > /dev/null
 
 _msg "Installing gcc (libgomp)"
 make install-target-libgomp > /dev/null
+
+# 8. gcc derivatives
+cd $ICEPEARL_SOURCES/gcc
+_msg "Creating limits.h"
+cat gcc/limitx.h gcc/glimits.h gcc/limity.h > `dirname $($ICEPEARL_TARGET-gcc -print-libgcc-file-name)`/include/limits.h
+_msg "Linking into $ICEPEARL_TARGET-cc"
+ln -s $ICEPEARL_TARGET-gcc $ICEPEARL_TOOLCHAIN/bin/$ICEPEARL_TARGET-cc
