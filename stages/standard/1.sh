@@ -1,7 +1,7 @@
 #!/bin/bash -e
 CURDIR="$(pwd)"
-source ${CURDIR}/commons/functions.sh
-source ${CURDIR}/commons/vars.sh
+source ${CURDIR}/common/functions.sh
+source ${CURDIR}/common/vars.sh
 
 _msg "Dwleting icepearl directory"
 rm -rf $ICEPEARL_DIR
