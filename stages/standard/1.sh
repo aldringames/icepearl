@@ -90,13 +90,13 @@ sed '/thread_header =/s/@.*@/gthr-posix.h/' -i libgcc/Makefile.in libstdc++-v3/i
 
 _msg "Configuring gcc"
 mkdir $ICEPEARL_BUILD/gcc && cd $ICEPEARL_BUILD/gcc
-AR=$BLD_AR                                 \
-CC=$BLD_CC                                 \
-CXX=$BLD_CXX                               \
-CFLAGS=$BLD_CFLAGS                         \
-CXXFLAGS=$BLD_CXXFLAGS                     \
-LDFLAGS=$BLD_LDFLAGS                       \
-LDFLAGS_FOR_TARGET=-L$ICEPEARL_HOST/libgcc \
+AR=$BLD_AR                                      \
+CC=$BLD_CC                                      \
+CXX=$BLD_CXX                                    \
+CFLAGS=$BLD_CFLAGS                              \
+CXXFLAGS=$BLD_CXXFLAGS                          \
+LDFLAGS=$BLD_LDFLAGS                            \
+LDFLAGS_FOR_TARGET=-L$PWD/$ICEPEARL_HOST/libgcc \
 $ICEPEARL_SOURCES/gcc/configure "${_configure_options[@]:?_configure_options unset}" \
 	                        --target=$ICEPEARL_HOST                              \
 				--with-build-syroot=/                                \
