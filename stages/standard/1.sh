@@ -137,7 +137,7 @@ make DESTDIR=$ICEPEARL_ROOTFS install > /dev/null
 # 4. linux-headers
 _msg "Downloading and extracting linux-headers"
 mkdir $ICEPEARL_SOURCES/linux-headers
-wget -q -O- https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.14.316.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/linux-headers
+wget -q -O- https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git/snapshot/linux-stable-rc-4.14.316.tar.gz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/linux-headers
 cd $ICEPEARL_SOURCES/linux-headers
 
 _msg "Building linux-headers"
@@ -176,6 +176,19 @@ make -j4 > /dev/null
 _msg "Installing make"
 make DESTDIR=$ICEPEARL_ROOTFS install > /dev/null
 
-# 7. ncurses
+# 7. file
+mkdir $ICEPEARL_SOURCES/file
+wget -q -O- https://astron.com/pub/file/file-5.44.tar.gz | | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/file
+cd $ICEPEARL_SOURCES/file
+
+_msg "Configuring file"
+./configure "${_configure_options[@]:?_configure_options unset}" \
+	    --disable-libseccomp > /dev/null
+
+_msg "Building file"
+make -j4 > /dev/null
+
+_msg "Installing file"
+make DESTDIR=$ICEPEARL_ROOTFS install > /dev/null
 
 ls $ICEPEARL_ROOTFS/*
