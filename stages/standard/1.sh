@@ -137,7 +137,7 @@ make DESTDIR=$ICEPEARL_ROOTFS install > /dev/null
 # 4. linux-headers
 _msg "Downloading and extracting linux-headers"
 mkdir $ICEPEARL_SOURCES/linux-headers
-wget -q -O- https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git/snapshot/linux-stable-rc-4.14.316.tar.gz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/linux-headers
+wget -q -O- https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git/snapshot/linux-stable-rc-4.14.316.tar.gz | tar -xzf- --strip-components=1 -C $ICEPEARL_SOURCES/linux-headers
 cd $ICEPEARL_SOURCES/linux-headers
 
 _msg "Building linux-headers"
