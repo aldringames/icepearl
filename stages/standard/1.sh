@@ -23,18 +23,18 @@ pushd $ICEPEARL_ROOTFS
            var/lib/{color,misc,locate}                         \
            {dev,proc,sys,run}
   # Using /usr merge
-  ln -sfv usr/bin sbin
-  ln -sfv usr/bin bin
-  ln -sfv usr/lib lib
-  ln -sfv usr/lib lib64
-  ln -sfv bin usr/sbin 
-  ln -sfv lib usr/lib64
+  ln -sf usr/bin sbin
+  ln -sf usr/bin bin
+  ln -sf usr/lib lib
+  ln -sf usr/lib lib64
+  ln -sf bin usr/sbin 
+  ln -sf lib usr/lib64
 
-  ln -sfv run var/run
-  ln -sfv run/lock var/lock
+  ln -sf run var/run
+  ln -sf run/lock var/lock
 
-  install -dv -m 0750 root
-  install -dv -m 1777 tmp var/tmp
+  install -d -m 0750 root
+  install -d -m 1777 tmp var/tmp
 popd 
 
 # Configure options
@@ -50,11 +50,40 @@ _configure_options=(--prefix=/usr
 		    --mandir=/usr/share/man
 	            --build=$ICEPEARL_HOST
 	            --host=$ICEPEARL_HOST)
+# 1. binutils
+_msg "Downloading and extracting binutils"
+mkdir $ICEPEARL_SOURCES/binutils
+wget -q -O- https://ftp.gnu.org/pub.gnu/binutils/binutils-2.40.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/binutils
+cd $ICEPEARL_SOURCES/binutils
+sed '6009s/$add_dir//' -i ltmain.sh
 
-# 1. glibc
+_msg "Configuring binutils"
+mkdir $ICEPEARL_BUILD/binutils && cd $ICEPEARL_BUILD/binutils
+AR=$BLD_AR             \
+AS=$BLD_AS             \
+CC=$BLD_CC             \
+CXX=$BLD_CXX           \
+CFLAGS=$BLD_CFLAGS     \
+CXXFLAGS=$BLD_CXXFLAGS \
+LDFLAGS=$BLD_LDFLAGS   \
+$ICEPEARL_SOURCES/binutils/configure "${_configure_options[@]:?_configure_options unset}" \
+	                             --enable-shared                                      \
+				     --enable-64-bit-bfd                                  \
+	                             --disable-nls                                        \
+				     --disable-werror > /dev/null
+
+_msg "Building binutils"
+make -j4 > /dev/null
+
+_msg "Installing binutils"
+make DESTDIR=$ICEPEARL_ROOTFS prefix=/usr tooldir=/usr install > /dev/null
+
+# 3. gcc
+
+# 4. glibc
 _msg "Downloading and extracting glibc"
 mkdir $ICEPEARL_SOURCES/glibc
-wget -q -O- https://ftp.gnu.org/gnu/glibc/glibc-2.37.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/glibc
+wget -q -O- https://ftp.gnu.org/pub/gnu/glibc/glibc-2.37.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/glibc
 cd $ICEPEARL_SOURCES/glibc
 sed '/width -=/s/workend - string/number_length/' -i stdio-common/vfprintf-process-arg.c
 
@@ -64,7 +93,7 @@ cat > configparms <<EOF
 slibdir=/usr/lib
 rtlddir=/usr/lib
 sbindir=/usr/bin
-rootsbindir=/usr/bib
+rootsbindir=/usr/bin
 EOF
 $ICEPEARL_SOURCES/glibc/configure "${_configure_options[@]:?_configure_options unset}" \
 	                          --with-headers=/usr/include                          \
@@ -76,6 +105,7 @@ _msg "Building glibc"
 make -j4 > /dev/null
 
 _msg "Installing glibc"
-make DESTDIR=$ICEPEARL_ROOTFS install
+make DESTDIR=$ICEPEARL_ROOTFS install > /dev/null
 
 ls $ICEPEARL_ROOTFS
+ls $ICEPEARL_ROOTFS/*
