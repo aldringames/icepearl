@@ -61,13 +61,6 @@ sed '6009s/$add_dir//' -i ltmain.sh
 
 _msg "Configuring binutils"
 mkdir $ICEPEARL_BUILD/binutils && cd $ICEPEARL_BUILD/binutils
-AR=$BLD_AR             \
-AS=$BLD_AS             \
-CC=$BLD_CC             \
-CXX=$BLD_CXX           \
-CFLAGS=$BLD_CFLAGS     \
-CXXFLAGS=$BLD_CXXFLAGS \
-LDFLAGS=$BLD_LDFLAGS   \
 $ICEPEARL_SOURCES/binutils/configure "${_configure_options[@]:?_configure_options unset}" \
 	                             --enable-shared                                      \
 				     --enable-64-bit-bfd                                  \
@@ -78,9 +71,9 @@ _msg "Building binutils"
 make -j4 > /dev/null
 
 _msg "Installing binutils"
-make DESTDIR=$ICEPEARL_ROOTFS prefix=/usr tooldir=/usr install > /dev/null
+make DESTDIR=$ICEPEARL_ROOTFS prefix=/usr tooldir=/usr install-strip > /dev/null
 
-# 3. gcc
+# 2. gcc
 _msg "Downloading and extracting gcc"
 mkdir $ICEPEARL_SOURCES/gcc
 wget -q -O- https://ftp.gnu.org/pub/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/gcc
@@ -90,13 +83,6 @@ sed '/thread_header =/s/@.*@/gthr-posix.h/' -i libgcc/Makefile.in libstdc++-v3/i
 
 _msg "Configuring gcc"
 mkdir $ICEPEARL_BUILD/gcc && cd $ICEPEARL_BUILD/gcc
-AR=$BLD_AR                                      \
-CC=$BLD_CC                                      \
-CXX=$BLD_CXX                                    \
-CFLAGS=$BLD_CFLAGS                              \
-CXXFLAGS=$BLD_CXXFLAGS                          \
-LDFLAGS=$BLD_LDFLAGS                            \
-LDFLAGS_FOR_TARGET=-L$PWD/$ICEPEARL_HOST/libgcc \
 $ICEPEARL_SOURCES/gcc/configure "${_configure_options[@]:?_configure_options unset}" \
 	                        --target=$ICEPEARL_HOST                              \
 				--with-build-syroot=/                                \
@@ -108,15 +94,19 @@ $ICEPEARL_SOURCES/gcc/configure "${_configure_options[@]:?_configure_options uns
 				--disable-libquadmath                                \
 				--disable-libssp                                     \
 				--disable-libvtv                                     \
-				--enable-languages=c,c++ > /dev/null
+				--enable-languages=c,c++                             \
+				LDFLAGS_FOR_TARGET=-L$PWD/$ICEPEARL_HOST/libgcc > /dev/null
 
 _msg "Building gcc"
 make -j4 > /dev/null
 
 _msg "Installing gcc"
-make DESTDIR=$ICEPEARL_ROOTFS install > /dev/null
+make DESTDIR=$ICEPEARL_ROOTFS install-strip > /dev/null
 
-# 4. glibc
+_msg "Linking gcc as cc"
+ln -s gcc $ICEPEARL_ROOTFS/usr/bin/cc
+
+# 3. glibc
 _msg "Downloading and extracting glibc"
 mkdir $ICEPEARL_SOURCES/glibc
 wget -q -O- https://ftp.gnu.org/pub/gnu/glibc/glibc-2.37.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/glibc
@@ -141,7 +131,20 @@ _msg "Building glibc"
 make -j4 > /dev/null
 
 _msg "Installing glibc"
-make DESTDIR=$ICEPEARL_ROOTFS install > /dev/null
+make DESTDIR=$ICEPEARL_ROOTFS install-strip > /dev/null
+
+# 4. linux-headers
+_msg "Downloading and extracting linux-headers"
+mkdir $ICEPEARL_SOURCES/linux-headers
+wget -q -O- https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.14.316.tar.xz | tar -xJf- --strip-co
+mponents=1 -C $ICEPEARL_SOURCES/linux-headers
+cd $ICEPEARL_SOURCES/linux-headers
+
+_msg "Building linux-headers"
+make mrproper
+
+_msg "Installing linux-headers"
+make INSTALL_HDR_PATH="${ICEPEARL_ROOTFS}/usr" headers_install
 
 ls $ICEPEARL_ROOTFS
 ls $ICEPEARL_ROOTFS/*
