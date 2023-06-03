@@ -71,7 +71,7 @@ _msg "Building binutils"
 make -j4 > /dev/null
 
 _msg "Installing binutils"
-make DESTDIR=$ICEPEARL_ROOTFS prefix=/usr tooldir=/usr install-strip > /dev/null
+make DESTDIR=$ICEPEARL_ROOTFS prefix=/usr tooldir=/usr install > /dev/null
 
 # 2. gcc
 _msg "Downloading and extracting gcc"
@@ -101,7 +101,7 @@ _msg "Building gcc"
 make -j4 > /dev/null
 
 _msg "Installing gcc"
-make DESTDIR=$ICEPEARL_ROOTFS install-strip > /dev/null
+make DESTDIR=$ICEPEARL_ROOTFS install > /dev/null
 
 _msg "Linking gcc as cc"
 ln -s gcc $ICEPEARL_ROOTFS/usr/bin/cc
@@ -131,7 +131,7 @@ _msg "Building glibc"
 make -j4 > /dev/null
 
 _msg "Installing glibc"
-make DESTDIR=$ICEPEARL_ROOTFS install-strip > /dev/null
+make DESTDIR=$ICEPEARL_ROOTFS install > /dev/null
 
 # 4. linux-headers
 _msg "Downloading and extracting linux-headers"
