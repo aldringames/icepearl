@@ -27,8 +27,10 @@ pushd $ICEPEARL_ROOTFS
   ln -sf usr/bin bin
   ln -sf usr/lib lib
   ln -sf usr/lib lib64
-  ln -sf bin usr/sbin 
+  ln -sf usr/lib libexec
+  ln -sf bin usr/sbin
   ln -sf lib usr/lib64
+  ln -sf lib usr/libexec
 
   ln -sf run var/run
   ln -sf run/lock var/lock
@@ -79,6 +81,40 @@ _msg "Installing binutils"
 make DESTDIR=$ICEPEARL_ROOTFS prefix=/usr tooldir=/usr install > /dev/null
 
 # 3. gcc
+_msg "Downloading and extracting gcc"
+mkdir $ICEPEARL_SOURCES/gcc
+wget -q -O- https://ftp.gnu.org/pub/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/gcc
+cd $ICEPEARL_SOURCES/gcc
+sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
+sed '/thread_header =/s/@.*@/gthr-posix.h/' -i libgcc/Makefile.in libstdc++-v3/include/Makefile.in
+
+_msg "Configuring gcc"
+mkdir $ICEPEARL_BUILD/gcc && cd $ICEPEARL_BUILD/gcc
+AR=$BLD_AR                                 \
+CC=$BLD_CC                                 \
+CXX=$BLD_CXX                               \
+CFLAGS=$BLD_CFLAGS                         \
+CXXFLAGS=$BLD_CXXFLAGS                     \
+LDFLAGS=$BLD_LDFLAGS                       \
+LDFLAGS_FOR_TARGET=-L$ICEPEARL_HOST/libgcc \
+$ICEPEARL_SOURCES/gcc/configure "${_configure_options[@]:?_configure_options unset}" \
+	                        --target=$ICEPEARL_HOST                              \
+				--with-build-syroot=/                                \
+				--enable-default-pie                                 \
+				--enable-default-ssp                                 \
+				--disable-multilib                                   \
+				--disable-nls                                        \
+				--disable-libatomic                                  \
+				--disable-libquadmath                                \
+				--disable-libssp                                     \
+				--disable-libvtv                                     \
+				--enable-languages=c,c++ > /dev/null
+
+_msg "Building gcc"
+make -j4 > /dev/null
+
+_msg "Installing gcc"
+make DESTDIR=$ICEPEARL_ROOTFS install > /dev/null
 
 # 4. glibc
 _msg "Downloading and extracting glibc"
