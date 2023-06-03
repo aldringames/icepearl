@@ -53,7 +53,7 @@ _configure_options=(--prefix=/usr
 # 1. binutils
 _msg "Downloading and extracting binutils"
 mkdir $ICEPEARL_SOURCES/binutils
-wget -q -O- https://ftp.gnu.org/pub.gnu/binutils/binutils-2.40.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/binutils
+wget -q -O- https://ftp.gnu.org/pub/gnu/binutils/binutils-2.40.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/binutils
 cd $ICEPEARL_SOURCES/binutils
 sed '6009s/$add_dir//' -i ltmain.sh
 
