@@ -55,7 +55,7 @@ _configure_options=(--prefix=/usr
 # 1. binutils
 _msg "Downloading and extracting binutils"
 mkdir $ICEPEARL_SOURCES/binutils
-wget -q -O- https://ftp.gnu.org/pub/gnu/binutils/binutils-2.40.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/binutils
+wget -q -O- http://ftp.gnu.org/pub/gnu/binutils/binutils-2.40.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/binutils
 cd $ICEPEARL_SOURCES/binutils
 sed '6009s/$add_dir//' -i ltmain.sh
 
@@ -76,7 +76,7 @@ make DESTDIR=$ICEPEARL_ROOTFS prefix=/usr tooldir=/usr install > /dev/null
 # 2. gcc
 _msg "Downloading and extracting gcc"
 mkdir $ICEPEARL_SOURCES/gcc
-wget -q -O- https://ftp.gnu.org/pub/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/gcc
+wget -q -O- http://ftp.gnu.org/pub/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/gcc
 cd $ICEPEARL_SOURCES/gcc
 sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
 sed '/thread_header =/s/@.*@/gthr-posix.h/' -i libgcc/Makefile.in libstdc++-v3/include/Makefile.in
@@ -91,6 +91,7 @@ $ICEPEARL_SOURCES/gcc/configure "${_configure_options[@]:?_configure_options uns
 				--disable-multilib                                   \
 				--disable-nls                                        \
 				--disable-libatomic                                  \
+				--disable-libgomp                                    \
 				--disable-libquadmath                                \
 				--disable-libssp                                     \
 				--disable-libvtv                                     \
@@ -109,7 +110,7 @@ ln -s gcc $ICEPEARL_ROOTFS/usr/bin/cc
 # 3. glibc
 _msg "Downloading and extracting glibc"
 mkdir $ICEPEARL_SOURCES/glibc
-wget -q -O- https://ftp.gnu.org/pub/gnu/glibc/glibc-2.37.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/glibc
+wget -q -O- http://ftp.gnu.org/pub/gnu/glibc/glibc-2.37.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/glibc
 cd $ICEPEARL_SOURCES/glibc
 sed '/width -=/s/workend - string/number_length/' -i stdio-common/vfprintf-process-arg.c
 
@@ -146,5 +147,36 @@ make mrproper
 _msg "Installing linux-headers"
 make INSTALL_HDR_PATH="${ICEPEARL_ROOTFS}/usr" headers_install
 
-ls $ICEPEARL_ROOTFS
+# 5. m4
+_msg "Downloading and extracting m4"
+mkdir $ICEPEARL_SOURCES/m4
+wget -q -O- http://ftp.gnu.org/pub/gnu/m4/m4-1.4.19.tar.xz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/m4
+cd $ICEPEARL_SOURCES/m4
+
+_msg "Configuring m4"
+./configure "${_configure_options[@]:?_configure_options unset}"
+
+_msg "Building m4"
+make -j4 > /dev/null
+
+_msg "Installing m4"
+make DESTDIR=$ICEPEARL_ROOTFS install > /dev/null
+
+# 6. make
+_msg "Downloading and extracting make"
+mkdir $ICEPEARL_SOURCES/make
+wget -q -O- http://ftp.gnu.org/pub/gnu/make/make-4.4.1.tar.gz | tar -xzf- --strip-components=1 -C $ICEPEARL_SOURCES/make
+cd $ICEPEARL_SOURCES/make
+
+_msg "Configuring make"
+./configure "${_configure_options[@]:?_configure_options unset}"
+
+_msg "Building make"
+make -j4 > /dev/null
+
+_msg "Installing make"
+make DESTDIR=$ICEPEARL_ROOTFS install > /dev/null
+
+# 7. ncurses
+
 ls $ICEPEARL_ROOTFS/*
