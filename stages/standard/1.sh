@@ -141,10 +141,10 @@ wget -q -O- https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-
 cd $ICEPEARL_SOURCES/linux-headers
 
 _msg "Building linux-headers"
-make mrproper
+make mrproper > /dev/null
 
 _msg "Installing linux-headers"
-make INSTALL_HDR_PATH="${ICEPEARL_ROOTFS}/usr" headers_install
+make INSTALL_HDR_PATH="${ICEPEARL_ROOTFS}/usr" headers_install > /dev/null
 
 # 5. m4
 _msg "Downloading and extracting m4"
@@ -153,7 +153,7 @@ wget -q -O- http://ftp.gnu.org/pub/gnu/m4/m4-1.4.19.tar.xz | tar -xJf- --strip-c
 cd $ICEPEARL_SOURCES/m4
 
 _msg "Configuring m4"
-./configure "${_configure_options[@]:?_configure_options unset}"
+./configure "${_configure_options[@]:?_configure_options unset}" > /dev/null
 
 _msg "Building m4"
 make -j4 > /dev/null
@@ -168,7 +168,7 @@ wget -q -O- http://ftp.gnu.org/pub/gnu/make/make-4.4.1.tar.gz | tar -xzf- --stri
 cd $ICEPEARL_SOURCES/make
 
 _msg "Configuring make"
-./configure "${_configure_options[@]:?_configure_options unset}"
+./configure "${_configure_options[@]:?_configure_options unset}" > /dev/null
 
 _msg "Building make"
 make -j4 > /dev/null
@@ -178,7 +178,7 @@ make DESTDIR=$ICEPEARL_ROOTFS install > /dev/null
 
 # 7. file
 mkdir $ICEPEARL_SOURCES/file
-wget -q -O- https://astron.com/pub/file/file-5.44.tar.gz | | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/file
+wget -q -O- https://astron.com/pub/file/file-5.44.tar.gz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/file
 cd $ICEPEARL_SOURCES/file
 
 _msg "Configuring file"
