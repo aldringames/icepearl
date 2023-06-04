@@ -178,7 +178,7 @@ make DESTDIR=$ICEPEARL_ROOTFS install > /dev/null
 
 # 7. file
 mkdir $ICEPEARL_SOURCES/file
-wget -q -O- https://astron.com/pub/file/file-5.44.tar.gz | tar -xJf- --strip-components=1 -C $ICEPEARL_SOURCES/file
+wget -q -O- https://astron.com/pub/file/file-5.44.tar.gz | tar -xzf- --strip-components=1 -C $ICEPEARL_SOURCES/file
 cd $ICEPEARL_SOURCES/file
 
 _msg "Configuring file"
