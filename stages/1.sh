@@ -8,7 +8,7 @@ _msg "Preparing icepearl directores"
 mkdir -p $ICEPEARL_DIR/{build,toolchain,sources,rootfs,iso,initrd}
 
 _msg "Cloning binutils"
-_git_clone master git://sourceware.org/git/binutils-gdb.git $ICEPEARL_SOURCES/binutils >> $ICEPEARL_ISO/build-log
+_clone master git://sourceware.org/git/binutils-gdb.git $ICEPEARL_SOURCES/binutils >> $ICEPEARL_ISO/build-log
 cd $ICEPEARL_SOURCES/binutils
 sed '6009s/$add_dir//' -i ltmain.sh
 
@@ -25,7 +25,6 @@ $ICEPEARL_SOURCES/binutils/configure --prefix=$ICEPEARL_TOOLCHAIN       \
 				     --disable-gdbsupport               \
 				     --disable-gprof                    \
 				     --disable-gprofng                  \
-				     --disable-multilib                 \
 				     --disable-nls                      \
 				     --disable-werror >> $ICEPEARL_ISO/build-log
 
