@@ -70,7 +70,8 @@ $ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN       \
 				--disable-libvtv                   \
 				--disable-nls                      \
 				--disable-shared                   \
-                                --disable-threads >> $ICEPEARL_TOOLCHAIN/build-log
+                                --disable-threads                  \
+				--disable-werror >> $ICEPEARL_TOOLCHAIN/build-log
 
 _msg "Building gcc-static"
 _make all-gcc all-target-libgcc> $ICEPEARL_TOOLCHAIN/build-log
@@ -95,16 +96,36 @@ $ICEPEARL_SOURCES/glibc/configure --prefix=/usr                                 
 				  --libexecdir=/usr/lib                          \
 				  --host=$ICEPEARL_TARGET                        \
 				  --with-headers=$ICEPEARL_TOOLCHAIN/usr/include \
-				  --enable-kernel=4.19 >> $ICEPEARL_TOOLCHAIN/build-log
+				  --enable-kernel=4.19                           \
+				  --disable-werror >> $ICEPEARL_TOOLCHAIN/build-log
 
 _msg "Building glibc"
 _make >> $ICEPEARL_TOOLCHAIN/build-log
 
-_msg "Installing binutils"
+_msg "Installing glibc"
 _make_install $ICEPEARL_TOOLCHAIN >> $ICEPEARL_TOOLCHAIN/build-log
 
 _msg "Fixing hard coded path"
 sed '/RTLDLIST=/s@/usr@@g' -i $ICEPEARL_TOOLCHAIN/usr/bin/ldd
+
+# 5. gcc
+_msg "Configuring gcc"
+mkdir $ICEPEARL_BUILD/gcc && cd $ICEPEARL_BUILD/gcc
+$ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN       \
+                                --libdir=/lib                      \
+                                --libexecdir=/lib                  \
+				--target=$ICEPEARL_TARGET          \
+                                --with-sysroot=$ICEPEARL_TOOLCHAIN \
+				--enable-initfini-array            \
+                                --enable-languages=c,c++           \
+				--disable-nls                      \
+				--disable-werror >> $ICEPEARL_TOOLCHAIN/build-log
+
+_msg "Building gcc"
+_make AS_FOR_TARGET="${ICEPEARL_TARGET}-as" LD_FOR_TARGET="${ICEPEARL_TARGET}-ld" >> $ICEPEARL_TOOLCHAIN/build-log
+
+_msg "Installing gcc"
+_make_install >> $ICEPEARL_TOOLCHAIN/build-log
 
 ls $ICEPEARL_TOOLCHAIN
 ls $ICEPEARL_TOOLCHAIN/*
