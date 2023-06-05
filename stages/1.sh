@@ -17,8 +17,6 @@ sed '6009s/$add_dir//' -i ltmain.sh
 _msg "Configuring binutils"
 mkdir $ICEPEARL_BUILD/binutils && cd $ICEPEARL_BUILD/binutils
 $ICEPEARL_SOURCES/binutils/configure --prefix=$ICEPEARL_TOOLCHAIN       \
-	                             --build=$ICEPEARL_HOST             \
-				     --host=$ICEPEARL_HOST              \
 	                             --target=$ICEPEARL_TARGET          \
 				     --with-sysroot=$ICEPEARL_TOOLCHAIN \
 				     --enable-deterministic-archives    \
@@ -57,8 +55,6 @@ _msg "Configuring gcc-static"
 mkdir $ICEPEARL_BUILD/gcc-static && cd $ICEPEARL_BUILD/gcc-static
 $ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN       \
 	                        --libexecdir=/lib                  \
-	                        --build=$ICEPEARL_HOST             \
-                                --host=$ICEPEARL_HOST              \
                                 --target=$ICEPEARL_TARGET          \
 				--with-sysroot=$ICEPEARL_TOOLCHAIN \
 				--with-newlib                      \
@@ -94,7 +90,6 @@ sbindir=/usr/bin
 rootsbindir=/usr/bin
 EOF
 $ICEPEARL_SOURCES/glibc/configure --prefix=/usr                                  \
-				  --build=$ICEPEARL_HOST                         \
 				  --host=$ICEPEARL_TARGET                        \
 				  --with-headers=$ICEPEARL_TOOLCHAIN/usr/include \
 				  --enable-kernel=4.19 >> $ICEPEARL_TOOLCHAIN/build-log
@@ -104,6 +99,9 @@ _make >> $ICEPEARL_TOOLCHAIN/build-log
 
 _msg "Installing binutils"
 _make_install $ICEPEARL_TOOLCHAIN >> $ICEPEARL_TOOLCHAIN/build-log
+
+_msg "Fixing hard coded path"
+sed '/RTLDLIST=/s@/usr@@g' -i $ICEPEARL_TOOLCHAIN/usr/bin/ldd
 
 ls $ICEPEARL_TOOLCHAIN
 ls $ICEPEARL_TOOLCHAIN/*
