@@ -3,11 +3,12 @@ CURDIR="$(pwd)"
 source ${CURDIR}/common/functions.sh
 source ${CURDIR}/common/vars.sh
 
-_msg "Dwleting icepearl directory"
+_msg "Deleting icepearl directory"
 rm -rf $ICEPEARL_DIR
 _msg "Preparing icepearl directores"
 mkdir -p $ICEPEARL_DIR/{build,toolchain,sources,rootfs,iso,initrd}
 
+# 1. binutils
 _msg "Cloning binutils"
 _clone master git://sourceware.org/git/binutils-gdb.git $ICEPEARL_SOURCES/binutils >> $ICEPEARL_TOOLCHAIN/build-log
 cd $ICEPEARL_SOURCES/binutils
@@ -34,3 +35,19 @@ _make >> $ICEPEARL_TOOLCHAIN/build-log
 
 _msg "Installing binutils"
 _make_install >> $ICEPEARL_TOOLCHAIN/build-log
+
+# 2. linux-headers
+_msg "Cloning linux-headers"
+_clone linux-rolling-lts git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git $ICEPEARL_SOURCES/linux-headers
+cd $ICEPEARL_SOURCES/linux-headers
+
+_msg "Building linux-headers"
+make ARCH=x86 mrproper >> $ICEPEARL_TOOLCHAIN/build-log
+
+_msg "Installing linux-headers"
+make ARCH=x86 INSTALL_HDR_PATH="${ICEPEARL_TOOLCHAIN}/usr" headers_install >> $ICEPEARL_TOOLCHAIN/build-log
+
+ls $ICEPEARL_TOOLCHAIN
+ls $ICEPEARL_TOOLCHAIN/*
+ls $ICEPEARL_TOOLCHAIN/usr
+ls $ICEPEARL_TOOLCHAIN/usr/*
