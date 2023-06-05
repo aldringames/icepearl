@@ -47,7 +47,12 @@ make ARCH=x86 mrproper >> $ICEPEARL_TOOLCHAIN/build-log
 _msg "Installing linux-headers"
 make ARCH=x86 INSTALL_HDR_PATH="${ICEPEARL_TOOLCHAIN}/usr" headers_install >> $ICEPEARL_TOOLCHAIN/build-log
 
+# 3. gcc-static
+_msg "Cloning gcc"
+_clone releases/gcc-13 git://gcc.gnu.org/git/gcc.git $ICEPEARL_SOURCES/gcc
+
 ls $ICEPEARL_TOOLCHAIN
 ls $ICEPEARL_TOOLCHAIN/*
 ls $ICEPEARL_TOOLCHAIN/usr
 ls $ICEPEARL_TOOLCHAIN/usr/*
+ls $ICEPEARL_TOOLCHAIN/usr/include
