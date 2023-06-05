@@ -54,6 +54,7 @@ sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
 _msg "Configuring gcc-static"
 mkdir $ICEPEARL_BUILD/gcc-static && cd $ICEPEARL_BUILD/gcc-static
 $ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN       \
+	                        --libdir=/lib                      \
 	                        --libexecdir=/lib                  \
                                 --target=$ICEPEARL_TARGET          \
 				--with-sysroot=$ICEPEARL_TOOLCHAIN \
@@ -90,6 +91,8 @@ sbindir=/usr/bin
 rootsbindir=/usr/bin
 EOF
 $ICEPEARL_SOURCES/glibc/configure --prefix=/usr                                  \
+	                          --libdir=/usr/lib                              \
+				  --libexecdir=/usr/lib                          \
 				  --host=$ICEPEARL_TARGET                        \
 				  --with-headers=$ICEPEARL_TOOLCHAIN/usr/include \
 				  --enable-kernel=4.19 >> $ICEPEARL_TOOLCHAIN/build-log
