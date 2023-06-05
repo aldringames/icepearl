@@ -50,6 +50,35 @@ make ARCH=x86 INSTALL_HDR_PATH="${ICEPEARL_TOOLCHAIN}/usr" headers_install >> $I
 # 3. gcc-static
 _msg "Cloning gcc"
 _clone releases/gcc-13 git://gcc.gnu.org/git/gcc.git $ICEPEARL_SOURCES/gcc
+cd $ICEPEARL_SOURCES/gcc
+sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
+
+_msg "Building gcc-static"
+mkdir $ICEPEARL_BUILD/gcc-static && cd $ICEPEARL_BUILD/gcc-static
+$ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN       \
+	                        --build=$ICEPEARL_HOST             \
+                                --host=$ICEPEARL_HOST              \
+                                --target=$ICEPEARL_TARGET          \
+				--with-sysroot=$ICEPEARL_TOOLCHAIN \
+				--with-newlib                      \
+				--without-headers                  \
+				--enable-initfini-array            \
+				--enable-languages=c,c++           \
+				--disable-libatomic                \
+				--disable-libgomp                  \
+				--disable-libquadmath              \
+				--disable-libssp                   \
+				--disable-libstdcxx                \
+				--disable-libvtv                   \
+				--disable-nls                      \
+				--disable-shared                   \
+                                --disable-threads >> $ICEPEARL_TOOLCHAIN/build-log
+
+_msg "Building gcc-static"
+_make all-gcc all-target-libgcc> $ICEPEARL_TOOLCHAIN/build-log
+
+_msg "Installing gcc-static"
+make install-gcc install-target-libgcc >> $ICEPEARL_TOOLCHAIN/build-log
 
 ls $ICEPEARL_TOOLCHAIN
 ls $ICEPEARL_TOOLCHAIN/*
