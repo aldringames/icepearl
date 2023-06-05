@@ -65,16 +65,9 @@ $ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN       \
 				--without-headers                  \
 				--enable-initfini-array            \
 				--enable-languages=c,c++           \
-				--disable-libatomic                \
-				--disable-libgomp                  \
-				--disable-libquadmath              \
-				--disable-libssp                   \
-				--disable-libstdcxx                \
-				--disable-libvtv                   \
 				--disable-nls                      \
 				--disable-shared                   \
-                                --disable-threads                  \
-				--disable-werror >> $ICEPEARL_TOOLCHAIN/build-log
+                                --disable-werror >> $ICEPEARL_TOOLCHAIN/build-log
 
 _msg "Building gcc-static"
 _make all-gcc all-target-libgcc> $ICEPEARL_TOOLCHAIN/build-log
@@ -111,24 +104,13 @@ _make_install $ICEPEARL_TOOLCHAIN >> $ICEPEARL_TOOLCHAIN/build-log
 _msg "Fixing hard coded path"
 sed '/RTLDLIST=/s@/usr@@g' -i $ICEPEARL_TOOLCHAIN/usr/bin/ldd
 
-# 5. gcc
-_msg "Configuring gcc"
-mkdir $ICEPEARL_BUILD/gcc && cd $ICEPEARL_BUILD/gcc
-$ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN       \
-                                --libdir=/lib                      \
-                                --libexecdir=/lib                  \
-				--target=$ICEPEARL_TARGET          \
-                                --with-sysroot=$ICEPEARL_TOOLCHAIN \
-				--enable-initfini-array            \
-                                --enable-languages=c,c++           \
-				--disable-nls                      \
-				--disable-werror >> $ICEPEARL_TOOLCHAIN/build-log
+# 5. Building gcc-final_
+cd $ICEPEARL_BUILD/gcc
+_msg "Building gcc-final"
+_make all-target-libstdc++-v3 all-target-libgomp >> $ICEPEARL_TOOLCHAIN/build-log
 
-_msg "Building gcc"
-_make AS_FOR_TARGET="${ICEPEARL_TARGET}-as" LD_FOR_TARGET="${ICEPEARL_TARGET}-ld" >> $ICEPEARL_TOOLCHAIN/build-log
-
-_msg "Installing gcc"
-_make_install >> $ICEPEARL_TOOLCHAIN/build-log
+_msg "Installing gcc-final"
+make install-target-libstdc++-v3 install-target-libgomp >> $ICEPEARL_TOOLCHAIN/build-log
 
 ls $ICEPEARL_TOOLCHAIN
 ls $ICEPEARL_TOOLCHAIN/*
