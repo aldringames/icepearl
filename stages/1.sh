@@ -51,6 +51,9 @@ _clone releases/gcc-13 git://gcc.gnu.org/git/gcc.git $ICEPEARL_SOURCES/gcc >> $I
 cd $ICEPEARL_SOURCES/gcc
 sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
 
+_msg "Downloading gcc prerequisites"
+./contrib/download_prerequisites
+
 _msg "Configuring gcc-static"
 mkdir $ICEPEARL_BUILD/gcc-static && cd $ICEPEARL_BUILD/gcc-static
 $ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN       \
