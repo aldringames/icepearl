@@ -11,7 +11,7 @@ mkdir -p $ICEPEARL_DIR/{build,toolchain,sources,rootfs,iso,initrd}
 # 1. binutils
 _msg "Downloading binutils"
 mkdir $ICEPEARL_SOURCES/binutils
-_fetch_unpack https://ftp.gnu.org/pub/gnu/binutils/binutils-2.40.tar.xz $ICEPEARL_SOURCES/binutils >> $ICEPEARL_TOOLCHAIN/build-log
+_fetch https://ftp.gnu.org/pub/gnu/binutils/binutils-2.40.tar.xz $ICEPEARL_SOURCES/binutils >> $ICEPEARL_TOOLCHAIN/build-log
 cd $ICEPEARL_SOURCES/binutils
 sed '6009s/$add_dir//' -i ltmain.sh
 
@@ -38,7 +38,7 @@ _make_install >> $ICEPEARL_TOOLCHAIN/build-log
 # 2. linux-headers
 _msg "Downloading linux-headers"
 mkdir $ICEPEARL_SOURCES/linux-headers
-_fetch_unpack https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.1.32.tar.xz $ICEPEARL_SOURCES/linux-headers >> $ICEPEARL_TOOLCHAIN/build-log
+_fetch https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.1.32.tar.xz $ICEPEARL_SOURCES/linux-headers >> $ICEPEARL_TOOLCHAIN/build-log
 cd $ICEPEARL_SOURCES/linux-headers
 
 _msg "Building linux-headers"
@@ -50,7 +50,7 @@ make ARCH=x86 INSTALL_HDR_PATH="${ICEPEARL_TOOLCHAIN}/usr" headers_install >> $I
 # 3. gcc-static
 _msg "Downloading gcc"
 mkdir $ICEPEARL_SOURCES/gcc
-_fetch_unpack https://ftp.gnu.org/pub/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz $ICEPEARL_SOURCES/gcc >> $ICEPEARL_TOOLCHAIN/build-log
+_fetch https://ftp.gnu.org/pub/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz $ICEPEARL_SOURCES/gcc >> $ICEPEARL_TOOLCHAIN/build-log
 cd $ICEPEARL_SOURCES/gcc
 sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
 
