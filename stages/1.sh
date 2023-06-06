@@ -9,8 +9,9 @@ _msg "Preparing icepearl directores"
 mkdir -p $ICEPEARL_DIR/{build,toolchain,sources,rootfs,iso,initrd}
 
 # 1. binutils
-_msg "Cloning binutils"
-_clone master git://sourceware.org/git/binutils-gdb.git $ICEPEARL_SOURCES/binutils >> $ICEPEARL_TOOLCHAIN/build-log
+_msg "Downloading binutils"
+mkdir $ICEPEARL_SOURCES/binutils
+_fetch_unpack https://ftp.gnu.org/pub/gnu/binutils/binutils-2.40.tar.xz $ICEPEARL_SOURCES/binutils >> $ICEPEARL_TOOLCHAIN/build-log
 cd $ICEPEARL_SOURCES/binutils
 sed '6009s/$add_dir//' -i ltmain.sh
 
@@ -35,8 +36,9 @@ _msg "Installing binutils"
 _make_install >> $ICEPEARL_TOOLCHAIN/build-log
 
 # 2. linux-headers
-_msg "Cloning linux-headers"
-_clone linux-rolling-lts git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git $ICEPEARL_SOURCES/linux-headers >> $ICEPEARL_TOOLCHAIN/build-log
+_msg "Downloading linux-headers"
+mkdir $ICEPEARL_SOURCES/linux-headers
+_fetch_unpack https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.1.32.tar.xz $ICEPEARL_SOURCES/linux-headers >> $ICEPEARL_TOOLCHAIN/build-log
 cd $ICEPEARL_SOURCES/linux-headers
 
 _msg "Building linux-headers"
@@ -46,8 +48,9 @@ _msg "Installing linux-headers"
 make ARCH=x86 INSTALL_HDR_PATH="${ICEPEARL_TOOLCHAIN}/usr" headers_install >> $ICEPEARL_TOOLCHAIN/build-log
 
 # 3. gcc-static
-_msg "Cloning gcc"
-_clone releases/gcc-13 git://gcc.gnu.org/git/gcc.git $ICEPEARL_SOURCES/gcc >> $ICEPEARL_TOOLCHAIN/build-log
+_msg "Downloading gcc"
+mkdir $ICEPEARL_SOURCES/gcc
+_fetch_unpack https://ftp.gnu.org/pub/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz $ICEPEARL_SOURCES/gcc >> $ICEPEARL_TOOLCHAIN/build-log
 cd $ICEPEARL_SOURCES/gcc
 sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
 
@@ -83,7 +86,7 @@ _msg "Installing gcc-static"
 _make_install >> $ICEPEARL_TOOLCHAIN/build-log
 
 # 4. glibc
-_msg "Cloning glibc"
+_msg "Downloading glibc"
 _clone master git://sourceware.org/git/glibc.git $ICEPEARL_SOURCES/glibc >> $ICEPEARL_TOOLCHAIN/build-log
 
 _msg "Configuring glibc"
@@ -122,7 +125,7 @@ $ICEPEARL_SOURCES/gcc/libstdc++-v3/configure --prefix=/usr           \
 					     --disable-multilib      \
 					     --disable-nls           \
 					     --disable-werror        \
-					     --with-gxx-include-dir=/$ICEPEARL_TARGET/include/c++/13.1.1 >> $ICEPEARL_TOOLCHAIN/build-log
+					     --with-gxx-include-dir=/$ICEPEARL_TARGET/include/c++/13.1.0 >> $ICEPEARL_TOOLCHAIN/build-log
 
 _msg "Building libstdc++-v3"
 _make >> $ICEPEARL_TOOLCHAIN/build-log
