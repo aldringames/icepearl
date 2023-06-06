@@ -118,9 +118,11 @@ $ICEPEARL_SOURCES/gcc/libstdc++-v3/configure --prefix=/usr           \
                                              --libdir=/usr/lib       \
                                              --libexecdir=/usr/lib   \
 					     --host=$ICEPEARL_TARGET \
+					     --disable-libstdcxx-pch \
 					     --disable-multilib      \
 					     --disable-nls           \
-					     --disable-werror >> $ICEPEARL_TOOLCHAIN/build-log
+					     --disable-werror        \
+					     --with-gxx-include-dir=/$ICEPEARL_TARGET/include/c++/13.1.1 >> $ICEPEARL_TOOLCHAIN/build-log
 
 _msg "Building libstdc++-v3"
 _make >> $ICEPEARL_TOOLCHAIN/build-log
