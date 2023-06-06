@@ -65,15 +65,22 @@ $ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN       \
 				--without-headers                  \
 				--enable-initfini-array            \
 				--enable-languages=c,c++           \
+				--disable-libatomic                \
+				--disable-libgomp                  \
+				--disable-libquadmath              \
+				--disable-libssp                   \
+				--disable-libstdcxx                \
+				--disable-libvtv                   \
 				--disable-nls                      \
 				--disable-shared                   \
+				--disable-threads                  \
                                 --disable-werror >> $ICEPEARL_TOOLCHAIN/build-log
 
 _msg "Building gcc-static"
-_make all-gcc all-target-libgcc> $ICEPEARL_TOOLCHAIN/build-log
+_make >> $ICEPEARL_TOOLCHAIN/build-log
 
 _msg "Installing gcc-static"
-make install-gcc install-target-libgcc >> $ICEPEARL_TOOLCHAIN/build-log
+_make_install >> $ICEPEARL_TOOLCHAIN/build-log
 
 # 4. glibc
 _msg "Cloning glibc"
@@ -104,13 +111,22 @@ _make_install $ICEPEARL_TOOLCHAIN >> $ICEPEARL_TOOLCHAIN/build-log
 _msg "Fixing hard coded path"
 sed '/RTLDLIST=/s@/usr@@g' -i $ICEPEARL_TOOLCHAIN/usr/bin/ldd
 
-# 5. Building gcc-final_
-cd $ICEPEARL_BUILD/gcc
-_msg "Building gcc-final"
-_make all-target-libstdc++-v3 all-target-libgomp >> $ICEPEARL_TOOLCHAIN/build-log
+# 5. libstdc++-v3
+mkdir $ICEPEARL_BUILD/libstdc++-v3 && cd $ICEPEARL_BUILD/libstdc++-v3
+_msg "Configuring libstdc++-v3"
+$ICEPEARL_SOURCES/gcc/libstdc++-v3/configure --prefix=/usr           \
+                                             --libdir=/usr/lib       \
+                                             --libexecdir=/usr/lib   \
+					     --host=$ICEPEARL_TARGET \
+					     --disable-multilib      \
+					     --disable-nls           \
+					     --disable-werror >> $ICEPEARL_TOOLCHAIN/build-log
 
-_msg "Installing gcc-final"
-make install-target-libstdc++-v3 install-target-libgomp >> $ICEPEARL_TOOLCHAIN/build-log
+_msg "Building libstdc++-v3"
+_make >> $ICEPEARL_TOOLCHAIN/build-log
+
+_msg "Installing libstdc++-v3"
+_make_install $ICEPEARL_TOOLCHAIN >> $ICEPEARL_TOOLCHAIN/build-log
 
 ls $ICEPEARL_TOOLCHAIN
 ls $ICEPEARL_TOOLCHAIN/*
