@@ -61,7 +61,8 @@ $ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN       \
 				--with-sysroot=$ICEPEARL_TOOLCHAIN \
 				--with-newlib                      \
 				--without-headers                  \
-				--enable-initfini-array            \
+				--enable-default-pie               \
+				--enable-default-ssp               \
 				--enable-languages=c,c++           \
 				--disable-libatomic                \
 				--disable-libgomp                  \
