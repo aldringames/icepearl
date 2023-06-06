@@ -20,12 +20,7 @@ mkdir $ICEPEARL_BUILD/binutils && cd $ICEPEARL_BUILD/binutils
 $ICEPEARL_SOURCES/binutils/configure --prefix=$ICEPEARL_TOOLCHAIN       \
 	                             --target=$ICEPEARL_TARGET          \
 				     --with-sysroot=$ICEPEARL_TOOLCHAIN \
-				     --enable-deterministic-archives    \
-				     --disable-gdb                      \
-				     --disable-gdbserver                \
-				     --disable-gdbsupport               \
-				     --disable-gprof                    \
-				     --disable-gprofng                  \
+				     --disable-multilib                 \
 				     --disable-nls                      \
 				     --disable-werror >> $ICEPEARL_TOOLCHAIN/build-log
 
@@ -74,6 +69,7 @@ $ICEPEARL_SOURCES/gcc/configure --prefix=$ICEPEARL_TOOLCHAIN       \
 				--disable-libssp                   \
 				--disable-libstdcxx                \
 				--disable-libvtv                   \
+				--disable-multilib                 \
 				--disable-nls                      \
 				--disable-shared                   \
 				--disable-threads                  \
