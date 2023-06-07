@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: debian:latest
+      image: ubuntu:lunar
     steps:
       - name: Checkout repository
         uses: actions/checkout@main
