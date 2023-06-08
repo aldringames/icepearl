@@ -84,7 +84,8 @@ _make_install >> $ICEPEARL_TOOLCHAIN/build-log
 
 # 4. glibc
 _msg "Downloading glibc"
-_clone master git://sourceware.org/git/glibc.git $ICEPEARL_SOURCES/glibc >> $ICEPEARL_TOOLCHAIN/build-log
+mkdir $ICEPEARL_SOURCES/glibc
+_fetch https://ftp.gnu.org/pub/gnu/glibc/glibc-2.37.tar.xz $ICEPEARL_SOURCES/glibc
 
 _msg "Configuring glibc"
 mkdir $ICEPEARL_BUILD/glibc && cd $ICEPEARL_BUILD/glibc
@@ -99,7 +100,7 @@ $ICEPEARL_SOURCES/glibc/configure --prefix=/usr                                 
 				  --libexecdir=/usr/lib                          \
 				  --host=$ICEPEARL_TARGET                        \
 				  --with-headers=$ICEPEARL_TOOLCHAIN/usr/include \
-				  --enable-kernel=4.19                           \
+				  --enable-kernel=4.14                           \
 				  --disable-werror >> $ICEPEARL_TOOLCHAIN/build-log
 
 _msg "Building glibc"
